@@ -1,0 +1,14 @@
+{
+	"info": {
+		"id": "zh.xiutaku",
+		"name": "Xiutaku",
+		"version": 1,
+		"url": "https://xiutaku.com",
+		"contentRating": 2,
+		"languages": ["zh"],
+		"minAppVersion": "0.7.1"
+	},
+	"config": {
+		"hidesFiltersWhileSearching": true
+	}
+}

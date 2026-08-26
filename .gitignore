@@ -1,5 +1,7 @@
 # Rust build output
 **/target/
+/public/
+/release/
 
 # Aidoku packaged source artifacts
 **/*.aix

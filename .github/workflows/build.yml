@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - master
     paths:
       - "sources/**"
       - "Makefile"
@@ -20,7 +21,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -35,7 +36,7 @@ jobs:
           targets: wasm32-unknown-unknown
 
       - name: Cache Rust build files
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cargo/registry/index
@@ -47,8 +48,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
-      - name: Install Aidoku CLI
-        run: cargo install --git https://github.com/Aidoku/aidoku-rs aidoku-cli
+      - name: Install Aidoku CLI if needed
+        run: |
+          if ! command -v aidoku >/dev/null 2>&1; then
+            cargo install --git https://github.com/Aidoku/aidoku-rs aidoku-cli
+          fi
 
       - name: Check formatting
         run: |
@@ -67,44 +71,46 @@ jobs:
       - name: Package sources
         run: |
           set -e
+          mkdir -p release
           for src in sources/*; do
             (cd "$src" && aidoku package)
+            name="${src##*/}"
+            mv "$src/package.aix" "release/$name.aix"
           done
 
       - name: Build source list
-        run: aidoku build sources/*/package.aix --name "Buondua Sources"
+        run: aidoku build release/*.aix --name "Buondua Sources"
+
+      - name: Verify source list
+        run: |
+          test -s public/index.json
+          test -s public/index.min.json
+          jq -e '.sources | length > 0' public/index.min.json >/dev/null
 
       - name: Disable Jekyll
         run: touch public/.nojekyll
 
       - name: Upload source package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: buondua-aidoku-source
-          path: sources/*/package.aix
+          path: release/*.aix
           if-no-files-found: error
 
-      - name: Configure GitHub Pages
-        if: github.event_name != 'pull_request'
-        uses: actions/configure-pages@v5
-
-      - name: Upload GitHub Pages artifact
-        if: github.event_name != 'pull_request'
-        uses: actions/upload-pages-artifact@v4
+      - name: Deploy to gh-pages branch
+        if: github.event_name != 'pull_request' && github.ref_name == github.event.repository.default_branch
+        uses: JamesIves/github-pages-deploy-action@v4.9.0
         with:
-          path: public
+          branch: gh-pages
+          folder: public
+          clean: true
+          single-commit: true
+          git-config-name: GitHub Actions
+          git-config-email: github-actions[bot]@users.noreply.github.com
+          commit-message: Update source list
 
-  deploy:
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Verify gh-pages source list
+        if: github.event_name != 'pull_request' && github.ref_name == github.event.repository.default_branch
+        run: |
+          git fetch --depth=1 origin gh-pages
+          git show FETCH_HEAD:index.min.json | jq -e '.sources | length > 0' >/dev/null
