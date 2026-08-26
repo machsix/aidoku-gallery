@@ -2,13 +2,14 @@
 	"info": {
 		"id": "zh.xiutaku",
 		"name": "Xiutaku",
-		"version": 1,
+		"version": 2,
 		"url": "https://xiutaku.com",
 		"contentRating": 2,
 		"languages": ["zh"],
 		"minAppVersion": "0.7.1"
 	},
 	"config": {
-		"hidesFiltersWhileSearching": true
+		"hidesFiltersWhileSearching": true,
+		"supportsTagSearch": true
 	}
 }

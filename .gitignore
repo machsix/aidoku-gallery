@@ -2,6 +2,7 @@
 **/target/
 /public/
 /release/
+/sources/test
 
 # Aidoku packaged source artifacts
 **/*.aix

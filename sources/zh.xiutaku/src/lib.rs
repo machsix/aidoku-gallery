@@ -47,7 +47,7 @@ fn parse_gallery_list(html: &Document) -> MangaPageResult {
                         url: Some(url),
                         status: MangaStatus::Completed,
                         content_rating: ContentRating::NSFW,
-                        viewer: Viewer::Webtoon,
+                        viewer: Viewer::RightToLeft,
                         ..Default::default()
                     })
                 })
@@ -154,7 +154,7 @@ impl Source for Xiutaku {
             });
             manga.status = MangaStatus::Completed;
             manga.content_rating = ContentRating::NSFW;
-            manga.viewer = Viewer::Webtoon;
+            manga.viewer = Viewer::RightToLeft;
             manga.url = Some(url.clone());
         }
 

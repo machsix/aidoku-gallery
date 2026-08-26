@@ -79,7 +79,7 @@ jobs:
           done
 
       - name: Build source list
-        run: aidoku build release/*.aix --name "Buondua Sources"
+        run: aidoku build release/*.aix --name "Aidoku Gallery" --output public
 
       - name: Verify source list
         run: |

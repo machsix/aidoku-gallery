@@ -1,5 +1,5 @@
 RUST_TARGET := wasm32-unknown-unknown
-SOURCE_MANIFESTS := $(wildcard sources/*/Cargo.toml)
+SOURCE_MANIFESTS := $(filter-out sources/test/Cargo.toml,$(wildcard sources/*/Cargo.toml))
 SOURCE_DIRS := $(patsubst %/Cargo.toml,%,$(SOURCE_MANIFESTS))
 SOURCE_NAMES := $(notdir $(SOURCE_DIRS))
 RELEASE_DIR := release
@@ -16,7 +16,7 @@ setup:
 	@command -v aidoku >/dev/null 2>&1 || cargo install --git https://github.com/Aidoku/aidoku-rs aidoku-cli
 
 check: setup
-	@set -e; for src in sources/*; do \
+	@set -e; for src in $(SOURCE_DIRS); do \
 		echo "Checking $$src"; \
 		(cd "$$src" && cargo fmt --all --check && cargo clippy -- -D warnings); \
 	done
@@ -37,7 +37,7 @@ FORCE:
 rebuild: clean package
 
 clean:
-	@set -e; for src in sources/*; do \
+	@set -e; for src in $(SOURCE_DIRS); do \
 		(cd "$$src" && cargo clean && rm -f package.aix); \
 	done
 	@rm -f "$(RELEASE_DIR)"/*.aix
