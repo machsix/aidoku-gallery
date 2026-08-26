@@ -1,0 +1,110 @@
+name: Build and publish source
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "sources/**"
+      - "Makefile"
+      - ".github/workflows/build.yml"
+  pull_request:
+    paths:
+      - "sources/**"
+      - "Makefile"
+      - ".github/workflows/build.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: "pages-${{ github.ref }}"
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - name: Cache Rust build files
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+            ~/.cargo/bin
+            sources/**/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('sources/**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Install Aidoku CLI
+        run: cargo install --git https://github.com/Aidoku/aidoku-rs aidoku-cli
+
+      - name: Check formatting
+        run: |
+          set -e
+          for src in sources/*; do
+            (cd "$src" && cargo fmt --all --check)
+          done
+
+      - name: Run Clippy
+        run: |
+          set -e
+          for src in sources/*; do
+            (cd "$src" && cargo clippy -- -D warnings)
+          done
+
+      - name: Package sources
+        run: |
+          set -e
+          for src in sources/*; do
+            (cd "$src" && aidoku package)
+          done
+
+      - name: Build source list
+        run: aidoku build sources/*/package.aix --name "Buondua Sources"
+
+      - name: Disable Jekyll
+        run: touch public/.nojekyll
+
+      - name: Upload source package
+        uses: actions/upload-artifact@v4
+        with:
+          name: buondua-aidoku-source
+          path: sources/*/package.aix
+          if-no-files-found: error
+
+      - name: Configure GitHub Pages
+        if: github.event_name != 'pull_request'
+        uses: actions/configure-pages@v5
+
+      - name: Upload GitHub Pages artifact
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: public
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

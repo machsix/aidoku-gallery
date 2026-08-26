@@ -1,0 +1,14 @@
+{
+	"info": {
+		"id": "multi.buondua",
+		"name": "Buondua",
+		"version": 1,
+		"url": "https://buondua.com",
+		"contentRating": 2,
+		"languages": ["All"],
+		"minAppVersion": "0.7.1"
+	},
+	"config": {
+		"hidesFiltersWhileSearching": true
+	}
+}

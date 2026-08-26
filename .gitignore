@@ -1,0 +1,13 @@
+# Rust build output
+**/target/
+
+# Aidoku packaged source artifacts
+**/*.aix
+
+# Editor and operating-system metadata
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
