@@ -8,6 +8,7 @@ completed manga with one webtoon-style chapter.
 | Source | ID | Language | Website |
 | --- | --- | --- | --- |
 | Buondua | `multi.buondua` | All | [buondua.com](https://buondua.com/) |
+| 4KHD | `multi.4khd` | All | [4khd.com](https://www.4khd.com/) |
 | Xiutaku | `zh.xiutaku` | Chinese | [xiutaku.com](https://xiutaku.com/) |
 
 Both sources support browsing, search, list pagination, gallery metadata, multi-page

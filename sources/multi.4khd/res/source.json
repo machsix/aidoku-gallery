@@ -1,0 +1,15 @@
+{
+	"info": {
+		"id": "multi.4khd",
+		"name": "4KHD",
+		"version": 2,
+		"url": "https://www.4khd.com",
+		"contentRating": 2,
+		"languages": ["All"],
+		"minAppVersion": "0.7.1"
+	},
+	"config": {
+		"hidesFiltersWhileSearching": true,
+		"supportsTagSearch": true
+	}
+}
