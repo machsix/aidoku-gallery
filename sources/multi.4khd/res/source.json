@@ -2,10 +2,10 @@
 	"info": {
 		"id": "multi.4khd",
 		"name": "4KHD",
-		"version": 2,
+		"version": 3,
 		"url": "https://www.4khd.com",
 		"contentRating": 2,
-		"languages": ["All"],
+		"languages": ["multi"],
 		"minAppVersion": "0.7.1"
 	},
 	"config": {

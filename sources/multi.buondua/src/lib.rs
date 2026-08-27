@@ -26,12 +26,23 @@ impl Source for Buondua {
         &self,
         query: Option<String>,
         page: i32,
-        _filters: Vec<FilterValue>,
+        filters: Vec<FilterValue>,
     ) -> Result<MangaPageResult> {
+        let query = query.or_else(|| {
+            filters.into_iter().find_map(|filter| match filter {
+                FilterValue::Select { id, value }
+                    if matches!(id.as_str(), "tag" | "genre") && !value.is_empty() =>
+                {
+                    Some(value)
+                }
+                _ => None,
+            })
+        });
         let mut parameters = QueryParameters::new();
         let mut has_parameters = false;
-        if let Some(query) = query.as_deref() {
-            parameters.push("search", Some(query));
+        if let Some(query) = query.as_deref().filter(|query| !query.trim().is_empty()) {
+            let query = query.split_whitespace().collect::<Vec<_>>().join(" ");
+            parameters.push("search", Some(&query));
             has_parameters = true;
         }
         if page > 1 {

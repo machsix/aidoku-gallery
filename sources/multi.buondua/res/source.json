@@ -2,10 +2,10 @@
 	"info": {
 		"id": "multi.buondua",
 		"name": "Buondua",
-		"version": 4,
+		"version": 5,
 		"url": "https://buondua.com",
 		"contentRating": 2,
-		"languages": ["All"],
+		"languages": ["multi"],
 		"minAppVersion": "0.7.1"
 	},
 	"config": {

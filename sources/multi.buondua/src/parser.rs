@@ -27,6 +27,14 @@ pub fn gallery_list(html: &Document) -> MangaPageResult {
                     let cover = element
                         .select_first(".item-thumb img")
                         .and_then(|image| image.attr("abs:src"));
+                    let tags = element
+                        .select(".item-tags a")
+                        .map(|tags| {
+                            tags.filter_map(|tag| tag.text())
+                                .map(|tag| tag.split_whitespace().collect::<Vec<_>>().join(" "))
+                                .collect::<Vec<_>>()
+                        })
+                        .unwrap_or_default();
 
                     Some(Manga {
                         key,
@@ -36,6 +44,7 @@ pub fn gallery_list(html: &Document) -> MangaPageResult {
                         status: MangaStatus::Completed,
                         content_rating: ContentRating::NSFW,
                         viewer: Viewer::RightToLeft,
+                        tags: Some(tags),
                         ..Default::default()
                     })
                 })
