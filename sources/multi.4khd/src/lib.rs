@@ -110,6 +110,7 @@ impl ImageRequestProvider for FourKhd {
         url: String,
         _context: Option<aidoku::PageContext>,
     ) -> Result<Request> {
+        let url = parser::normalize_image_url(url);
         net::image_request(&url)
     }
 }

@@ -123,11 +123,16 @@ pub fn append_images(html: &Document, pages: &mut Vec<Page>) {
     }
 }
 
-fn normalize_image_url(url: String) -> String {
+pub fn normalize_image_url(url: String) -> String {
     const RAW_PREFIX: &str = "https://i0.wp.com/pic.4khd.com/";
-    const IMAGE_HOST_PREFIX: &str = "https://img.4khd.com/";
+    const IMAGE_HOST_PREFIX: &str = "https://yt4.googleusercontent.com/";
 
-    url.strip_prefix(RAW_PREFIX)
-        .map(|path| format!("{IMAGE_HOST_PREFIX}{path}"))
-        .unwrap_or(url)
+    let Some(path) = url.strip_prefix(RAW_PREFIX) else {
+        return url;
+    };
+    let path = path.split('?').next().unwrap_or(path);
+    // The site's service worker corrects this ambiguous Google URL segment.
+    let path = path.replace("l/AAAAA", "I/AAAAA");
+
+    format!("{IMAGE_HOST_PREFIX}{path}")
 }
