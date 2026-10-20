@@ -1,6 +1,6 @@
 use aidoku::{
     ContentRating, Manga, MangaPageResult, MangaStatus, Page, PageContent, Viewer,
-    alloc::{String, Vec, string::ToString},
+    alloc::{String, Vec, format, string::ToString},
     imports::html::Document,
 };
 
@@ -21,7 +21,8 @@ pub fn gallery_list(html: &Document) -> MangaPageResult {
                     }
                     let cover = element
                         .select_first("figure.wp-block-post-featured-image img")
-                        .and_then(|image| image.attr("abs:src"));
+                        .and_then(|image| image.attr("abs:src"))
+                        .map(normalize_image_url);
                     Some(Manga {
                         key,
                         title,
@@ -78,6 +79,7 @@ pub fn cover(html: &Document) -> Option<String> {
             html.select_first("main .wp-block-post-content img")
                 .and_then(|element| element.attr("abs:src"))
         })
+        .map(normalize_image_url)
 }
 
 pub fn title_tags(title: &str) -> Option<Vec<String>> {
@@ -112,11 +114,20 @@ pub fn page_count(html: &Document) -> i32 {
 pub fn append_images(html: &Document, pages: &mut Vec<Page>) {
     if let Some(images) = html.select("main .wp-block-post-content img") {
         pages.extend(images.filter_map(|image| {
-            let url = image.attr("abs:src")?;
+            let url = normalize_image_url(image.attr("abs:src")?);
             Some(Page {
                 content: PageContent::url(url),
                 ..Default::default()
             })
         }));
     }
+}
+
+fn normalize_image_url(url: String) -> String {
+    const RAW_PREFIX: &str = "https://i0.wp.com/pic.4khd.com/";
+    const IMAGE_HOST_PREFIX: &str = "https://img.4khd.com/";
+
+    url.strip_prefix(RAW_PREFIX)
+        .map(|path| format!("{IMAGE_HOST_PREFIX}{path}"))
+        .unwrap_or(url)
 }
