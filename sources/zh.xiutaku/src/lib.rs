@@ -69,7 +69,7 @@ fn parse_gallery_list(html: &Document) -> MangaPageResult {
 
 fn page_count(html: &Document) -> i32 {
     let mut count = 1;
-    if let Some(links) = html.select(".article nav.pagination a.pagination-link") {
+    if let Some(links) = html.select("nav.pagination a.pagination-link") {
         for link in links {
             if let Some(value) = link.text().and_then(|value| value.trim().parse().ok()) {
                 count = count.max(value);
