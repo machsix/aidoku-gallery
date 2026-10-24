@@ -2,7 +2,8 @@
 
 use aidoku::{
     Chapter, ContentRating, DeepLinkHandler, DeepLinkResult, FilterValue, ImageRequestProvider,
-    Manga, MangaPageResult, MangaStatus, Page, PageContent, Result, Source, Viewer,
+    Listing, ListingProvider, Manga, MangaPageResult, MangaStatus, Page, PageContent, Result,
+    Source, Viewer,
     alloc::{String, Vec, string::ToString, vec},
     helpers::uri::QueryParameters,
     imports::{html::Document, net::Request, std::parse_date},
@@ -14,6 +15,8 @@ const REFERER: &str = "https://xiutaku.com/";
 const USER_AGENT: &str = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_5 like Mac OS X) \
                           AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.5 \
                           Mobile/15E148 Safari/604.1";
+
+mod home;
 
 struct Xiutaku;
 
@@ -56,7 +59,7 @@ fn parse_gallery_list(html: &Document) -> MangaPageResult {
         .unwrap_or_default();
 
     let has_next_page = html
-        .select_first("nav.pagination a[next]")
+        .select_first("nav.pagination a.pagination-next")
         .and_then(|element| element.attr("href"))
         .map(|href| href != "javascript:;")
         .unwrap_or(false);
@@ -156,7 +159,7 @@ impl Source for Xiutaku {
                 .and_then(|mut elements| elements.nth(1))
                 .and_then(|element| element.text())
                 .map(|description| description.trim().to_string());
-            manga.tags = html.select(".article-tags a.tag").map(|elements| {
+            manga.tags = html.select("div.article-tags a.tag").map(|elements| {
                 elements
                     .filter_map(|element| element.text())
                     .map(|tag| tag.trim().trim_start_matches('#').to_string())
@@ -203,6 +206,26 @@ impl Source for Xiutaku {
     }
 }
 
+impl ListingProvider for Xiutaku {
+    fn get_manga_list(&self, listing: Listing, page: i32) -> Result<MangaPageResult> {
+        let path = listing.id.as_str();
+        if !matches!(path, "/" | "/hot") {
+            bail!("Invalid listing");
+        }
+
+        let mut parameters = QueryParameters::new();
+        if page > 1 {
+            parameters.push("start", Some(&((page - 1) * 20).to_string()));
+        }
+        let url = if page > 1 {
+            format!("{BASE_URL}{path}?{parameters}")
+        } else {
+            format!("{BASE_URL}{path}")
+        };
+        Ok(parse_gallery_list(&Self::request(&url)?))
+    }
+}
+
 impl ImageRequestProvider for Xiutaku {
     fn get_image_request(
         &self,
@@ -234,4 +257,10 @@ impl DeepLinkHandler for Xiutaku {
     }
 }
 
-register_source!(Xiutaku, ImageRequestProvider, DeepLinkHandler);
+register_source!(
+    Xiutaku,
+    Home,
+    ListingProvider,
+    ImageRequestProvider,
+    DeepLinkHandler
+);
