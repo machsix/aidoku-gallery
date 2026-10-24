@@ -1,0 +1,44 @@
+{
+  "name": "Aidoku Gallery",
+  "sources": [
+    {
+      "id": "multi.4khd",
+      "name": "4KHD",
+      "version": 5,
+      "iconURL": "icons/multi.4khd-v5.png",
+      "downloadURL": "sources/multi.4khd-v5.aix",
+      "languages": [
+        "multi"
+      ],
+      "contentRating": 2,
+      "baseURL": "https://www.4khd.com",
+      "minAppVersion": "0.7.1"
+    },
+    {
+      "id": "multi.buondua",
+      "name": "Buondua",
+      "version": 5,
+      "iconURL": "icons/multi.buondua-v5.png",
+      "downloadURL": "sources/multi.buondua-v5.aix",
+      "languages": [
+        "multi"
+      ],
+      "contentRating": 2,
+      "baseURL": "https://buondua.com",
+      "minAppVersion": "0.7.1"
+    },
+    {
+      "id": "zh.xiutaku",
+      "name": "Xiutaku",
+      "version": 5,
+      "iconURL": "icons/zh.xiutaku-v5.png",
+      "downloadURL": "sources/zh.xiutaku-v5.aix",
+      "languages": [
+        "zh"
+      ],
+      "contentRating": 2,
+      "baseURL": "https://xiutaku.com",
+      "minAppVersion": "0.7.1"
+    }
+  ]
+}
